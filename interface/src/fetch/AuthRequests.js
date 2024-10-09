@@ -16,7 +16,7 @@ class AuthRequests {
     /**
      * Realiza a autenticação no servidor
      * @param {*} login - email e senha
-     * @returns **true** caso sucesso, **false** caso erro
+     * @returns *true* caso sucesso, *false* caso erro
      */
     async login(login) {       
         try {
@@ -37,11 +37,11 @@ class AuthRequests {
             }
             // caso a requisição seja bem sucedida, armazena a resposta em uma constante
             const data = await response.json();
-            console.log( data );
+            console.log(data);
 
             // verifica se o atributo auth da resposta tem o valor TRUE, se tiver é porque a autenticação teve sucesso
             if (data.auth) {
-                // persistem o token, o nome e o id do professor no localstorage
+                // persiste o token, o nome e o id do usuário no localstorage
                 this.persistToken(data.token, data.usuario.nome, data.usuario.id_usuario);
             }
 
@@ -57,35 +57,35 @@ class AuthRequests {
     /**
      * Persiste o token no localStorage
      * @param {*} token - token recebido do servidor
-     * @param {*} username - nome usuário recebido do servidor
-     * @param {*} idUsuario - idUsuario recebido do servidor
+     * @param {*} username - nome do usuário recebido do servidor
+     * @param {*} idUsuario - id do usuário recebido do servidor
      */
     persistToken(token, username, idUsuario) {
-        // adiciona o token no localstorade com o apelido de token
+        // adiciona o token no localstorage com o apelido de token
         localStorage.setItem('token', token);
-        // adiciona o nome de usuário no localstorade com o apelido de username
+        // adiciona o nome de usuário no localstorage com o apelido de username
         localStorage.setItem('username', username);
-        // adiciona o id da pessoa no localstorade com o apelido de idPessoa
+        // adiciona o id do usuário no localstorage com o apelido de idUsuario
         localStorage.setItem('idUsuario', idUsuario);
     }
 
     /**
-     * Remove o token no localStorage
+     * Remove o token do localStorage
      */
     removeToken() {
-        // remove o token do localstorade
+        // remove o token do localstorage
         localStorage.removeItem('token');
         // remove o username do localstorage
         localStorage.removeItem('username');
-        // remove o idPessoa do localstorage
-        localStorage.removeItem('idPessoa');
+        // remove o idUsuario do localstorage
+        localStorage.removeItem('idUsuario');
         // redireciona o usuário para a página Home
         window.location.href = '/';
     }
 
     /**
      * Verifica a validade do token
-     * @returns **true** caso token válido, **false** caso token inválido
+     * @returns *true* caso token válido, *false* caso token inválido
      */
     checkTokenExpiry() {
         // recupera o valor do token no localstorage
@@ -95,7 +95,7 @@ class AuthRequests {
         if (token) {
             // recupera a data de expiração do token
             const payload = JSON.parse(atob(token.split('.')[1]));
-            // recuepra a hora de expiração do token
+            // recupera a hora de expiração do token
             const expiry = payload.exp;
             // pega a data e hora atual
             const now = Math.floor(Date.now() / 1000);
