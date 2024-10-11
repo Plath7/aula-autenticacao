@@ -1,12 +1,29 @@
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import Button from 'react-bootstrap/Button';
-import AuthRequests from '../../fetch/AuthRequests'; // Importe o AuthRequests para manipular o token
-import { useNavigate } from 'react-router-dom'; // Importe o hook para navegação
+import Button from 'react-bootstrap/esm/Button';
+import AuthRequests from '../../fetch/AuthRequests';
+import { useState, useEffect } from 'react';
 
 function Navegacao() {
-    const navigate = useNavigate(); // Hook para redirecionar o usuário
+    // criando estado para controlar a renderização condicional e o nome do usuário
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [username, setUsername] = useState('');
+
+    /**
+    * Verifica a autenticação do usuário
+    */
+    useEffect(() => {
+        const token = localStorage.getItem('token');  // recupera o token do localstorage
+        const storedUsername = localStorage.getItem('username'); // recupera o nome do usuário do localstorage
+
+        if (token && AuthRequests.checkTokenExpiry()) {  // verifica a validade do token
+            setIsAuthenticated(true);  // caso o token seja válido, seta o valor de autenticação para true
+            setUsername(storedUsername || 'Admin'); // define o nome do usuário ou 'Admin' como padrão
+        } else {
+            setIsAuthenticated(false);  // caso o token seja inválido, seta o valor de autenticação para false
+        }
+    }, []);
 
     const estiloNavbar = {
         backgroundColor: 'var(--primaryColor)',
@@ -16,34 +33,33 @@ function Navegacao() {
         color: 'var(--fontColor)',
     }
 
-    // Função para verificar se o usuário está logado (se há token no localStorage)
-    const isLoggedIn = () => {
-        return !!localStorage.getItem('token'); // Retorna true se o token existe
-    }
-
-    // Função de logout
-    const handleLogout = () => {
-        AuthRequests.removeToken(); // Remove o token
-        navigate('/login'); // Redireciona para a página de login após o logout
+    const logout = () => {
+        AuthRequests.removeToken();
+        setIsAuthenticated(false); // redefine o estado de autenticação ao fazer logout
+        setUsername(''); // limpa o nome do usuário ao fazer logout
     }
 
     return (
         <>
             <Navbar style={estiloNavbar}>
                 <Container>
+                    {/* a opção Home é renderizada para todos os usuários, independente de estarem autenticados ou não */}
                     <Navbar.Brand href="/" style={estiloNavOptions}>Home</Navbar.Brand>
-                    <Nav className="me-auto">
-                        <Nav.Link href="/pessoas" style={estiloNavOptions}>Pessoas</Nav.Link>
-                    </Nav>
-                    {
-                        isLoggedIn() ? (
-                            // Exibe o botão de logout se o usuário estiver logado
-                            <Button variant='light' onClick={handleLogout}>Logout</Button>
-                        ) : (
-                            // Exibe o botão de login se o usuário não estiver logado
-                            <Button href='/login' variant='light'>Login</Button>
-                        )
-                    }
+                    {isAuthenticated ? ( // verifica se o usuário está autenticado (true)
+                        // renderiza as opções de navegação para usuário autenticado
+                        <>
+                            <Nav className="me-auto">
+                                <Nav.Link href="/pessoas" style={estiloNavOptions}>Pessoas</Nav.Link>
+                            </Nav>
+                            <div style={{ color: 'var(--fontColor)', marginRight: '10px' }}>
+                                Olá, {username.toUpperCase()}
+                            </div>
+                            <Button variant='light' onClick={logout}>Sair</Button>
+                        </>
+                    ) : (
+                        // renderiza as opções de navegação para usuário não autenticado
+                        <Button href='/login' variant='light'>Login</Button>
+                    )}
                 </Container>
             </Navbar>
         </>
